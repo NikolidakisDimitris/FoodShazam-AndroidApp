@@ -3,6 +3,7 @@
     package="com.dimnikol.foodshazam">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <!--Give permitions to camera -->
     <uses-feature android:name="android.hardware.camera"

@@ -42,7 +42,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/galeryButton"
+            android:id="@+id/galleryButton"
             style="@style/Widget.AppCompat.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,9 +55,10 @@
 
     <TextView
         android:layout_width="409dp"
-        android:layout_height="48dp"
+        android:layout_height="78dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:gravity="center"
         android:layout_marginEnd="0dp"
         android:layout_marginRight="0dp"
         android:text="@string/welcomeMsg"
