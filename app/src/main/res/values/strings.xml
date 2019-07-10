@@ -4,4 +4,5 @@
     <string name="cameraButton">Camera</string>
     <string name="galleryButton">Gallery</string>
     <string name="filler_image">Fills the space until an image is given</string>
+    <string name="wsData"></string>
 </resources>

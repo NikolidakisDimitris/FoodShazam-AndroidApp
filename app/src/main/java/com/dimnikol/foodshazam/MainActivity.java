@@ -2,93 +2,122 @@ package com.dimnikol.foodshazam;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 
+import static com.dimnikol.foodshazam.Utils.buildTextToDisplay;
+import static com.dimnikol.foodshazam.Utils.getPrefix;
+import static com.dimnikol.foodshazam.Utils.openCamera;
+import static com.dimnikol.foodshazam.Utils.openGallery;
+import static com.dimnikol.foodshazam.Utils.resetTextView;
+
 public class MainActivity extends AppCompatActivity {
+
     // Constants:
     public static final int CAMERA_CODE = 1;
-    public static final int GALERY_CODE = 2;
+    public static final int GALLERY_CODE = 2;
     private static final String URL_STRING = "http://snf-868919.vm.okeanos.grnet.gr:5001/uploader_food";
 
-
-    private ImageView imageView;
+    //The image that fills the first screen
+    private ImageView fillerView;
 
     private Button cameraButton;
     private Button galleryButton;
-    private Response jsonResponse;
+    private Response wsResponse;
+    private TextView wsDataToDisplay;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("MainPage", "Inside on the onCreate ");
+        Log.d(getPrefix(this), "initialize the buttons and views");
+
 
         //create the Button and the image View
         cameraButton = (Button) findViewById(R.id.cameraButton);
-        imageView = (ImageView) findViewById(R.id.filler_Image);
+        fillerView = (ImageView) findViewById(R.id.filler_Image);
+        wsDataToDisplay = (TextView) findViewById(R.id.wsData);
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openCamera(view);
+                Log.d(getPrefix(MainActivity.this), "Ready to open the camera");
+                openCamera(MainActivity.this);
             }
         });
         galleryButton = (Button) findViewById(R.id.galleryButton);
         galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openGallery(view);
+                Log.d(getPrefix(MainActivity.this), "Ready to open the gallery");
+                openGallery(MainActivity.this);
             }
         });
-    }
-
-
-    public void openCamera(View view) {
-        Log.d("FoodShazam", "Opening Camera");
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(cameraIntent, CAMERA_CODE);
-        Log.d("FoodShazam", "The Camera is open ");
-
-    }
-
-    public void openGallery(View view) {
-        Log.d("FoodShazam", "Opening Gallery");
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.addCategory(Intent.CATEGORY_OPENABLE);
-        galleryIntent.setType("image/*");
-        startActivityForResult(galleryIntent, GALERY_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d("FoodShazam ", " Ready to call the avtivity with code " + requestCode);
+        Log.d(getPrefix(this), " Ready to call the avtivity with code " + requestCode);
         if (resultCode != RESULT_CANCELED) {
             if (requestCode == CAMERA_CODE) {
-                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                sentFotoToWS(bitmap);
-                imageView.setImageBitmap(bitmap);
-            } else if (requestCode == GALERY_CODE) {
-                Log.d("FoodShazam", "Go to open the Gallery");
+                Toast.makeText(MainActivity.this, "Senting picture", Toast.LENGTH_LONG).show();
+                resetTextView(wsDataToDisplay);
+
+                final Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                Thread thread = new Thread() {
+
+                    @Override
+                    public void run() {
+                        super.run();
+                        sentFotoToWS(bitmap);
+                    }
+                };
+
+                thread.start();
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                fillerView.setImageBitmap(bitmap);
+                Log.d(getPrefix(this), "Ready to display the data");
+
+                wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
+
+                String textToDisplay = buildTextToDisplay(wsResponse);
+
+                wsDataToDisplay.setText(textToDisplay);
+                Log.d(getPrefix(this), "The data has been displayed");
+
+            } else if (requestCode == GALLERY_CODE) {
+                Toast.makeText(MainActivity.this, "Senting picture", Toast.LENGTH_LONG).show();
+                resetTextView(wsDataToDisplay);
+
+                Log.d(getPrefix(this), "Go to open the Gallery");
 
                 Uri selectImage = data.getData();
-                imageView.setImageURI(selectImage);
+                fillerView.setImageURI(selectImage);
             }
         }
     }
 
 
     protected void sentFotoToWS(final Bitmap bitmap) {
+
         Gson gson = new Gson();
 
         String mockResponse = "{\n" +
@@ -107,17 +136,17 @@ public class MainActivity extends AppCompatActivity {
                 "}";
 
 
-        jsonResponse = (Response) gson.fromJson(mockResponse, Response.class);
+        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
 
-        System.out.println("Antikeimeno");
-        System.out.println(jsonResponse);
+        System.out.println("The WS Response is :");
+        System.out.println(wsResponse);
 
-        jsonResponse = (Response) gson.fromJson(mockResponse, Response.class);
-        Log.d("FoodShazam", "The status code is " + jsonResponse.getStatus());
-        Log.d("FoodShazam", "The exeption is " + jsonResponse.getException());
-        Log.d("FoodShazam", "The food is " + jsonResponse.getFood());
-        Log.d("FoodShazam", "The recipie is " + jsonResponse.getRecipe());
-        Log.d("FoodShazam", "The ingredient is " + jsonResponse.getIngredient());
+        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
+        Log.d(getPrefix(this), "The status code is " + wsResponse.getStatus());
+        Log.d(getPrefix(this), "The exeption is " + wsResponse.getException());
+        Log.d(getPrefix(this), "The food is " + wsResponse.getFood());
+        Log.d(getPrefix(this), "The recipie is " + wsResponse.getRecipe());
+        Log.d(getPrefix(this), "The ingredient is " + wsResponse.getIngredient());
     }
 
     //TODO: This needs implementation to actully perform a post request and parse tbe responseObject
@@ -135,11 +164,11 @@ public class MainActivity extends AppCompatActivity {
 //            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 //                Log.e("FoooShazam", "Success. Response =  " + response.toString());
 //                Gson gson = new Gson();
-//                jsonResponse = (Response) gson.fromJson(String.valueOf(response), Response.class);
+//                wsResponse = (Response) gson.fromJson(String.valueOf(response), Response.class);
 //                Log.e("FoodShazam", "Successfull parsing of object");
-//                Log.e("FoodShazam", "Food " + jsonResponse.getFood());
-//                Log.e("FoodShazam", "Ingredient " + jsonResponse.getIngredient());
-//                Log.e("FoodShazam", "Recipie " + jsonResponse.getRecipe());
+//                Log.e("FoodShazam", "Food " + wsResponse.getFood());
+//                Log.e("FoodShazam", "Ingredient " + wsResponse.getIngredient());
+//                Log.e("FoodShazam", "Recipie " + wsResponse.getRecipe());
 //
 //            }
 //
@@ -147,8 +176,8 @@ public class MainActivity extends AppCompatActivity {
 //            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
 //                Log.e("FoooShazam", "Fail " + e.toString());
 //                Log.e("FoooShazam", "statusCode " + statusCode);
-//                jsonResponse = new Response();
-//                jsonResponse.setStatus("Failed to excecute the request");
+//                wsResponse = new Response();
+//                wsResponse.setStatus("Failed to excecute the request");
 //            }
 //        });
 //    }
