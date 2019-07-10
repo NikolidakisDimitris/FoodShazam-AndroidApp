@@ -2,6 +2,7 @@ package com.dimnikol.foodshazam;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +16,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 import static com.dimnikol.foodshazam.Utils.buildTextToDisplay;
 import static com.dimnikol.foodshazam.Utils.getPrefix;
@@ -67,50 +71,62 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    private void process(Bitmap bitmap) {
+        Toast.makeText(MainActivity.this, "Sending picture", Toast.LENGTH_LONG).show();
+        resetTextView(wsDataToDisplay);
+
+        Thread thread = new Thread() {
+
+            @Override
+            public void run() {
+                super.run();
+                sentFotoToWS(bitmap);
+            }
+        };
+
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        fillerView.setImageBitmap(bitmap);
+        Log.d(getPrefix(this), "Ready to display the data");
+        wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
+        String textToDisplay = buildTextToDisplay(wsResponse);
+        wsDataToDisplay.setText(textToDisplay);
+        Log.d(getPrefix(this), "The data has been displayed");
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(getPrefix(this), " Ready to call the avtivity with code " + requestCode);
+
+
         if (resultCode != RESULT_CANCELED) {
-            if (requestCode == CAMERA_CODE) {
-                Toast.makeText(MainActivity.this, "Senting picture", Toast.LENGTH_LONG).show();
-                resetTextView(wsDataToDisplay);
+            switch (requestCode) {
+                case CAMERA_CODE:
+                    final Bitmap image = (Bitmap) data.getExtras().get("data");
+                    process(image);
+                    break;
+                case GALLERY_CODE:
+                    try {
+                        final Uri imageUri = data.getData();
+                        final InputStream imageStream;
+                        imageStream = getContentResolver().openInputStream(imageUri);
+                        final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                        process(selectedImage);
 
-                final Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                Thread thread = new Thread() {
-
-                    @Override
-                    public void run() {
-                        super.run();
-                        sentFotoToWS(bitmap);
+                    } catch (FileNotFoundException e) {
+                        Log.d(getPrefix(this), "Oups something went wrong with the image loading");
+                        e.printStackTrace();
                     }
-                };
-
-                thread.start();
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                fillerView.setImageBitmap(bitmap);
-                Log.d(getPrefix(this), "Ready to display the data");
-
-                wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
-
-                String textToDisplay = buildTextToDisplay(wsResponse);
-
-                wsDataToDisplay.setText(textToDisplay);
-                Log.d(getPrefix(this), "The data has been displayed");
-
-            } else if (requestCode == GALLERY_CODE) {
-                Toast.makeText(MainActivity.this, "Senting picture", Toast.LENGTH_LONG).show();
-                resetTextView(wsDataToDisplay);
-
-                Log.d(getPrefix(this), "Go to open the Gallery");
-
-                Uri selectImage = data.getData();
-                fillerView.setImageURI(selectImage);
+                    break;
             }
         }
     }
