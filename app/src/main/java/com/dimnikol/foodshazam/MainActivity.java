@@ -20,6 +20,8 @@ import com.google.gson.Gson;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import static com.dimnikol.foodshazam.Utils.buildFoodToDisplay;
+import static com.dimnikol.foodshazam.Utils.buildRecipieToDisplay;
 import static com.dimnikol.foodshazam.Utils.buildTextToDisplay;
 import static com.dimnikol.foodshazam.Utils.getPrefix;
 import static com.dimnikol.foodshazam.Utils.openCamera;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private Button galleryButton;
     private Response wsResponse;
     private TextView wsDataToDisplay;
+    private Button recipeButton;
 
 
     @Override
@@ -69,6 +72,21 @@ public class MainActivity extends AppCompatActivity {
                 openGallery(MainActivity.this);
             }
         });
+        recipeButton = (Button) findViewById(R.id.recipeButton);
+        recipeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if ( wsResponse !=null && wsDataToDisplay != null) {
+                    Log.d(getPrefix(MainActivity.this), "Ready to display the recipe");
+                    String recipe = buildTextToDisplay(wsResponse);
+                    wsDataToDisplay.setText(R.string.wsData);
+                    wsDataToDisplay.setText(recipe);
+
+
+                }
+            }
+        });
+
     }
 
 
@@ -96,9 +114,12 @@ public class MainActivity extends AppCompatActivity {
         fillerView.setImageBitmap(bitmap);
         Log.d(getPrefix(this), "Ready to display the data");
         wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
-        String textToDisplay = buildTextToDisplay(wsResponse);
+        String textToDisplay = buildFoodToDisplay(wsResponse);
         wsDataToDisplay.setText(textToDisplay);
         Log.d(getPrefix(this), "The data has been displayed");
+
+        //appear the recipe button
+        recipeButton.setVisibility(View.VISIBLE);
     }
 
 

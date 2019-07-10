@@ -48,6 +48,15 @@
             android:text="@string/wsData"
             android:textColor="#D5FFFFFF" />
 
+        <Button
+            android:id="@+id/recipeButton"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/recipe"
+            android:visibility="invisible"
+            android:layout_gravity="center_horizontal"/>
+
     </FrameLayout>
 
     <LinearLayout
