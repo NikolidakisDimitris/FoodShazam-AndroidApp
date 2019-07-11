@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import static com.dimnikol.foodshazam.Utils.buildFoodToDisplay;
 import static com.dimnikol.foodshazam.Utils.buildTextToDisplay;
 import static com.dimnikol.foodshazam.Utils.getPrefix;
 import static com.dimnikol.foodshazam.Utils.openCamera;
@@ -36,12 +37,15 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
 
     //The image that fills the first screen
     private ImageView fillerView;
+    private TextView welcomeMsg;
 
     private Button cameraButton;
     private Button galleryButton;
     private Response wsResponse;
     private TextView wsDataToDisplay;
     private ProgressBar progressBar;
+    private Button recipeButton;
+
 
 
     @Override
@@ -49,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(getPrefix(this), "initialize the buttons and views");
+
+        welcomeMsg = (TextView) findViewById(R.id.welcomeMsg);
 
 
         //create the Button and the image View
@@ -72,6 +78,24 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
                 openGallery(MainActivity.this);
             }
         });
+
+        recipeButton = (Button) findViewById(R.id.recipeButton);
+        recipeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if ( wsResponse !=null && wsDataToDisplay != null) {
+                    Log.d(getPrefix(MainActivity.this), "Ready to display the recipe");
+                    String recipe = buildTextToDisplay(wsResponse);
+                    wsDataToDisplay.setText(R.string.wsData);
+                    wsDataToDisplay.setText(recipe);
+
+
+                }
+            }
+        });
+
+
+
     }
 
 
@@ -164,9 +188,14 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
         progressBar.setVisibility(View.GONE);
         Log.d(getPrefix(this), "Ready to display the data");
         wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
-        String textToDisplay = buildTextToDisplay(response);
+        String textToDisplay = buildFoodToDisplay(response);
         wsDataToDisplay.setText(textToDisplay);
         Log.d(getPrefix(this), "The data has been displayed");
+        welcomeMsg.setVisibility(View.GONE);
+
+        recipeButton.setVisibility(View.VISIBLE);
+
+
     }
 
     //TODO: This needs implementation to actully perform a post request and parse tbe responseObject

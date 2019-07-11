@@ -45,6 +45,39 @@ public class Utils {
     }
 
     //Create String to display.
+    public static String buildFoodToDisplay(Response response) {
+
+        String food = "The food is: " + response.getFood() + "\n";
+
+        String text = "\n" + "If you want to cook it by your self, you can follow the next recipe" + "\n";
+
+//        String ingredients = "\n" + "The ingredients you need are: " + "\n";
+//        for (String current : response.getIngredient()) {
+//            ingredients += current + "\n";
+//        }
+//
+//        String recipe = "\n" + "Steps" + "\n" + response.getRecipe();
+
+//        String textToDisplay = food + text + ingredients + recipe;
+        String textToDisplay = food + text ;
+
+        return textToDisplay;
+    }
+
+
+    public static String buildRecipieToDisplay(Response response){
+        String ingredients = "\n" + "The ingredients you need are: " + "\n";
+        for (String current : response.getIngredient()) {
+            ingredients += current + "\n";
+        }
+
+        String recipe = "\n" + "Steps" + "\n" + response.getRecipe();
+        String textToDisplay = ingredients + recipe;
+
+        return textToDisplay;
+    }
+
+    //Create String to display.
     public static String buildTextToDisplay(Response response) {
 
         String food = "The food is: " + response.getFood() + "\n";
@@ -62,6 +95,5 @@ public class Utils {
 
         return textToDisplay;
     }
-
 
 }
