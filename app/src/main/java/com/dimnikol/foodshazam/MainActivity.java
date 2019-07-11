@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,7 +27,7 @@ import static com.dimnikol.foodshazam.Utils.openCamera;
 import static com.dimnikol.foodshazam.Utils.openGallery;
 import static com.dimnikol.foodshazam.Utils.resetTextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskCallback {
 
     // Constants:
     public static final int CAMERA_CODE = 1;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private Button galleryButton;
     private Response wsResponse;
     private TextView wsDataToDisplay;
+    private ProgressBar progressBar;
 
 
     @Override
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         cameraButton = (Button) findViewById(R.id.cameraButton);
         fillerView = (ImageView) findViewById(R.id.filler_Image);
         wsDataToDisplay = (TextView) findViewById(R.id.wsData);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,29 +79,10 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "Sending picture", Toast.LENGTH_LONG).show();
         resetTextView(wsDataToDisplay);
 
-        Thread thread = new Thread() {
-
-            @Override
-            public void run() {
-                super.run();
-                sentFotoToWS(bitmap);
-            }
-        };
-
-        thread.start();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
         fillerView.setImageBitmap(bitmap);
-        Log.d(getPrefix(this), "Ready to display the data");
-        wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
-        String textToDisplay = buildTextToDisplay(wsResponse);
-        wsDataToDisplay.setText(textToDisplay);
-        Log.d(getPrefix(this), "The data has been displayed");
+        sentFotoToWS(bitmap);
+
+
     }
 
 
@@ -116,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case GALLERY_CODE:
                     try {
+
                         final Uri imageUri = data.getData();
                         final InputStream imageStream;
                         imageStream = getContentResolver().openInputStream(imageUri);
@@ -131,38 +116,57 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     protected void sentFotoToWS(final Bitmap bitmap) {
-
-        Gson gson = new Gson();
-
-        String mockResponse = "{\n" +
-                "  \"exception\": null, \n" +
-                "  \"food\": \"hamburger\", \n" +
-                "  \"ingredient\": [\n" +
-                "    \"1 pound lean ground beef\", \n" +
-                "    \"1 tablespoon Worcestershire sauce\", \n" +
-                "    \"1 tablespoon liquid smoke flavoring\", \n" +
-                "    \"1 teaspoon garlic powder\", \n" +
-                "    \"1 tablespoon olive oil\", \n" +
-                "    \"seasoned salt to taste \"\n" +
-                "  ], \n" +
-                "  \"recipe\": \"Preheat a grill for high heat.\\nIn a medium bowl, lightly mix together the ground beef, Worcestershire sauce, liquid smoke and garlic powder. Form into 3 patties, handling the meat minimally. Brush both sides of each patty with some oil, and season with seasoned salt.\\nPlace the patties on the grill grate, and cook for about 5 minutes per side, until well done.\\n\", \n" +
-                "  \"status\": \"OK\"\n" +
-                "}";
+        new UploadFileTask(this).execute(bitmap);
+    }
 
 
-        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
+//    protected void sentFotoToWS(final Bitmap bitmap) {
+//
+//        Gson gson = new Gson();
+//
+//        String mockResponse = "{\n" +
+//                "  \"exception\": null, \n" +
+//                "  \"food\": \"hamburger\", \n" +
+//                "  \"ingredient\": [\n" +
+//                "    \"1 pound lean ground beef\", \n" +
+//                "    \"1 tablespoon Worcestershire sauce\", \n" +
+//                "    \"1 tablespoon liquid smoke flavoring\", \n" +
+//                "    \"1 teaspoon garlic powder\", \n" +
+//                "    \"1 tablespoon olive oil\", \n" +
+//                "    \"seasoned salt to taste \"\n" +
+//                "  ], \n" +
+//                "  \"recipe\": \"Preheat a grill for high heat.\\nIn a medium bowl, lightly mix together the ground beef, Worcestershire sauce, liquid smoke and garlic powder. Form into 3 patties, handling the meat minimally. Brush both sides of each patty with some oil, and season with seasoned salt.\\nPlace the patties on the grill grate, and cook for about 5 minutes per side, until well done.\\n\", \n" +
+//                "  \"status\": \"OK\"\n" +
+//                "}";
+//
+//
+//        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
+//
+//        System.out.println("The WS Response is :");
+//        System.out.println(wsResponse);
+//
+//        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
+//        Log.d(getPrefix(this), "The status code is " + wsResponse.getStatus());
+//        Log.d(getPrefix(this), "The exeption is " + wsResponse.getException());
+//        Log.d(getPrefix(this), "The food is " + wsResponse.getFood());
+//        Log.d(getPrefix(this), "The recipie is " + wsResponse.getRecipe());
+//        Log.d(getPrefix(this), "The ingredient is " + wsResponse.getIngredient());
+//    }
 
-        System.out.println("The WS Response is :");
-        System.out.println(wsResponse);
+    @Override
+    public void onTaskScheduled() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
 
-        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
-        Log.d(getPrefix(this), "The status code is " + wsResponse.getStatus());
-        Log.d(getPrefix(this), "The exeption is " + wsResponse.getException());
-        Log.d(getPrefix(this), "The food is " + wsResponse.getFood());
-        Log.d(getPrefix(this), "The recipie is " + wsResponse.getRecipe());
-        Log.d(getPrefix(this), "The ingredient is " + wsResponse.getIngredient());
+    @Override
+    public void onTaskCompleted(Response response) {
+        progressBar.setVisibility(View.GONE);
+        Log.d(getPrefix(this), "Ready to display the data");
+        wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
+        String textToDisplay = buildTextToDisplay(response);
+        wsDataToDisplay.setText(textToDisplay);
+        Log.d(getPrefix(this), "The data has been displayed");
     }
 
     //TODO: This needs implementation to actully perform a post request and parse tbe responseObject
