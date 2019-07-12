@@ -25,9 +25,22 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/recipeButton"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:paddingBottom="5dp"
+        android:text="@string/recipe"
+        android:visibility="gone" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/recipeButton"
+        android:layout_above="@id/buttonsFrame"
         android:layout_alignParentStart="false"
         android:layout_alignParentLeft="false"
         android:layout_alignParentBottom="true"
@@ -41,24 +54,13 @@
             android:contentDescription="@string/filler_image"
             app:srcCompat="@drawable/launcher_icon" />
 
-        <Button
-            android:id="@+id/recipeButton"
-            style="@style/Widget.AppCompat.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/recipe"
-            android:visibility="gone" />
-
         <TextView
             android:id="@+id/wsData"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal|center_vertical"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@android:dimen/app_icon_size"
             android:text="@string/wsData"
-            android:textColor="#D5FFFFFF" />
+            android:textColor="#D5FFFFFF"/>
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -71,6 +73,7 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/buttonsFrame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

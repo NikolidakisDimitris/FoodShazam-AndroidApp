@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
             public void onClick(View view) {
                 Log.d(getPrefix(MainActivity.this), "Ready to open the gallery");
                 openGallery(MainActivity.this);
+                recipeButton.setVisibility(View.GONE);
             }
         });
 
@@ -147,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
         progressBar.setVisibility(View.GONE);
 
         //Display the data on the screen, and make darker the background
-        wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
+        wsDataToDisplay.setBackgroundColor(Color.parseColor("#99000000"));
         wsResponse = response;
 
         //The response of the API is not null
