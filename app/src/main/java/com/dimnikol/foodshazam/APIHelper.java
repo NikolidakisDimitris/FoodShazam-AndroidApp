@@ -13,7 +13,12 @@ import okhttp3.Response;
 
 public class APIHelper {
 
-    private static final String URL = "http://snf-868919.vm.okeanos.grnet.gr:5001/uploader_food";
+    //URL for Actual WebServer
+//    private static final String URL = "http://snf-868919.vm.okeanos.grnet.gr:5001/uploader_food";
+
+    //URL to run locally the API
+    private static final String URL = "http://10.0.2.2:5000/uploader_food";
+
     private static final String DEFAULT_FILE_NAME = "FILE";
 
     private static final OkHttpClient client;
@@ -50,7 +55,7 @@ public class APIHelper {
                     return response.body().string();
                 }
             } catch (Exception ex) {
-                Log.e("FoodShazam", ex.getMessage());
+                Log.e("FoodShazam > APIHelper", ex.getMessage());
             }
         }
 

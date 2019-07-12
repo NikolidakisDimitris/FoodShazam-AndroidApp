@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,8 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.gson.Gson;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -33,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
     // Constants:
     public static final int CAMERA_CODE = 1;
     public static final int GALLERY_CODE = 2;
-    private static final String URL_STRING = "http://snf-868919.vm.okeanos.grnet.gr:5001/uploader_food";
 
     //The image that fills the first screen
     private ImageView fillerView;
@@ -47,22 +45,19 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
     private Button recipeButton;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(getPrefix(this), "initialize the buttons and views");
 
-        welcomeMsg = (TextView) findViewById(R.id.welcomeMsg);
-
-
         //create the Button and the image View
-        cameraButton = (Button) findViewById(R.id.cameraButton);
         fillerView = (ImageView) findViewById(R.id.filler_Image);
         wsDataToDisplay = (TextView) findViewById(R.id.wsData);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
+        //button to open the camera
+        cameraButton = (Button) findViewById(R.id.cameraButton);
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
                 openCamera(MainActivity.this);
             }
         });
+
+        //button to open the gallery
         galleryButton = (Button) findViewById(R.id.galleryButton);
         galleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,30 +80,23 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
         recipeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if ( wsResponse !=null && wsDataToDisplay != null) {
+                if (wsResponse != null && wsDataToDisplay != null) {
+                    Log.d(getPrefix(MainActivity.this), "The Response want't null");
                     Log.d(getPrefix(MainActivity.this), "Ready to display the recipe");
                     String recipe = buildTextToDisplay(wsResponse);
                     wsDataToDisplay.setText(R.string.wsData);
                     wsDataToDisplay.setText(recipe);
-
-
                 }
             }
         });
-
-
-
     }
 
 
     private void process(Bitmap bitmap) {
-        Toast.makeText(MainActivity.this, "Sending picture", Toast.LENGTH_LONG).show();
+        Toast.makeText(MainActivity.this, "Sending picture", Toast.LENGTH_SHORT).show();
         resetTextView(wsDataToDisplay);
-
         fillerView.setImageBitmap(bitmap);
         sentFotoToWS(bitmap);
-
-
     }
 
 
@@ -145,7 +135,67 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
     }
 
 
-//    protected void sentFotoToWS(final Bitmap bitmap) {
+    @Override
+    public void onTaskScheduled() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+
+    @Override
+    public void onTaskCompleted(Response response) {
+        // remove the progress bar
+        progressBar.setVisibility(View.GONE);
+
+        //Display the data on the screen, and make darker the background
+        wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
+        wsResponse = response;
+
+        //The response of the API is not null
+        if (response != null) {
+            Log.d(getPrefix(MainActivity.this), "The Response want't null");
+            Log.d(getPrefix(this), "Ready to display the data");
+
+            if (response.getException() == null) {
+
+                String textToDisplay = buildFoodToDisplay(response);
+                wsDataToDisplay.setMovementMethod(new ScrollingMovementMethod());
+                wsDataToDisplay.setText(textToDisplay);
+                Log.d(getPrefix(this), "The data has been displayed");
+
+                //Remove the welcomeMsg, and appear a recipe button
+                welcomeMsg = (TextView) findViewById(R.id.welcomeMsg);
+                welcomeMsg.setVisibility(View.GONE);
+
+                recipeButton.setVisibility(View.VISIBLE);
+                recipeButton.setActivated(true);
+            } else if (response.getException().equals("OS ERROR")) {
+                Log.d(getPrefix(MainActivity.this), "The Response was OS ERROR, the type of the file was wrong");
+                String textToDisplay = "Ups! You uploaded a wrong file type :( \n Please try again ";
+                wsDataToDisplay.setMovementMethod(new ScrollingMovementMethod());
+                wsDataToDisplay.setText(textToDisplay);
+                Log.d(getPrefix(MainActivity.this), "The error message has been displayed");
+
+                //Remove the welcomeMsg, and appear a recipe button
+                welcomeMsg = (TextView) findViewById(R.id.welcomeMsg);
+                welcomeMsg.setVisibility(View.GONE);
+
+            }
+        }
+        //In case of null Response
+        else {
+            Log.d(getPrefix(MainActivity.this), "The Response was null");
+            String textToDisplay = "Ups! Something went wrong :( \n Please try again ";
+            wsDataToDisplay.setMovementMethod(new ScrollingMovementMethod());
+            wsDataToDisplay.setText(textToDisplay);
+            Log.d(getPrefix(MainActivity.this), "The error message has been displayed");
+
+            //Remove the welcomeMsg, and appear a recipe button
+            welcomeMsg = (TextView) findViewById(R.id.welcomeMsg);
+            welcomeMsg.setVisibility(View.GONE);
+        }
+
+
+        //    protected void sentFotoToWS(final Bitmap bitmap) {
 //
 //        Gson gson = new Gson();
 //
@@ -177,58 +227,5 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
 //        Log.d(getPrefix(this), "The recipie is " + wsResponse.getRecipe());
 //        Log.d(getPrefix(this), "The ingredient is " + wsResponse.getIngredient());
 //    }
-
-    @Override
-    public void onTaskScheduled() {
-        progressBar.setVisibility(View.VISIBLE);
     }
-
-    @Override
-    public void onTaskCompleted(Response response) {
-        progressBar.setVisibility(View.GONE);
-        Log.d(getPrefix(this), "Ready to display the data");
-        wsDataToDisplay.setBackgroundColor(Color.parseColor("#4F020000"));
-        String textToDisplay = buildFoodToDisplay(response);
-        wsDataToDisplay.setText(textToDisplay);
-        Log.d(getPrefix(this), "The data has been displayed");
-        welcomeMsg.setVisibility(View.GONE);
-
-        recipeButton.setVisibility(View.VISIBLE);
-
-
-    }
-
-    //TODO: This needs implementation to actully perform a post request and parse tbe responseObject
-//    protected void sentFotoToWS(final Bitmap bitmap) {
-//
-//        AsyncHttpClient client = new AsyncHttpClient();
-//        client.addHeader("Content-Type", "multipart/form-data");
-//
-//        RequestParams params = new RequestParams();
-//
-//        params.put("image", bitmap);
-//        client.post(URL_STRING, params, new JsonHttpResponseHandler() {
-//
-//            @Override
-//            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-//                Log.e("FoooShazam", "Success. Response =  " + response.toString());
-//                Gson gson = new Gson();
-//                wsResponse = (Response) gson.fromJson(String.valueOf(response), Response.class);
-//                Log.e("FoodShazam", "Successfull parsing of object");
-//                Log.e("FoodShazam", "Food " + wsResponse.getFood());
-//                Log.e("FoodShazam", "Ingredient " + wsResponse.getIngredient());
-//                Log.e("FoodShazam", "Recipie " + wsResponse.getRecipe());
-//
-//            }
-//
-//            @Override
-//            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject response) {
-//                Log.e("FoooShazam", "Fail " + e.toString());
-//                Log.e("FoooShazam", "statusCode " + statusCode);
-//                wsResponse = new Response();
-//                wsResponse.setStatus("Failed to excecute the request");
-//            }
-//        });
-//    }
 }
-
