@@ -195,38 +195,5 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
             welcomeMsg.setVisibility(View.GONE);
         }
 
-
-        //    protected void sentFotoToWS(final Bitmap bitmap) {
-//
-//        Gson gson = new Gson();
-//
-//        String mockResponse = "{\n" +
-//                "  \"exception\": null, \n" +
-//                "  \"food\": \"hamburger\", \n" +
-//                "  \"ingredient\": [\n" +
-//                "    \"1 pound lean ground beef\", \n" +
-//                "    \"1 tablespoon Worcestershire sauce\", \n" +
-//                "    \"1 tablespoon liquid smoke flavoring\", \n" +
-//                "    \"1 teaspoon garlic powder\", \n" +
-//                "    \"1 tablespoon olive oil\", \n" +
-//                "    \"seasoned salt to taste \"\n" +
-//                "  ], \n" +
-//                "  \"recipe\": \"Preheat a grill for high heat.\\nIn a medium bowl, lightly mix together the ground beef, Worcestershire sauce, liquid smoke and garlic powder. Form into 3 patties, handling the meat minimally. Brush both sides of each patty with some oil, and season with seasoned salt.\\nPlace the patties on the grill grate, and cook for about 5 minutes per side, until well done.\\n\", \n" +
-//                "  \"status\": \"OK\"\n" +
-//                "}";
-//
-//
-//        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
-//
-//        System.out.println("The WS Response is :");
-//        System.out.println(wsResponse);
-//
-//        wsResponse = (Response) gson.fromJson(mockResponse, Response.class);
-//        Log.d(getPrefix(this), "The status code is " + wsResponse.getStatus());
-//        Log.d(getPrefix(this), "The exeption is " + wsResponse.getException());
-//        Log.d(getPrefix(this), "The food is " + wsResponse.getFood());
-//        Log.d(getPrefix(this), "The recipie is " + wsResponse.getRecipe());
-//        Log.d(getPrefix(this), "The ingredient is " + wsResponse.getIngredient());
-//    }
     }
 }

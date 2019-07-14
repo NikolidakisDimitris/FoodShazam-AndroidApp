@@ -13,11 +13,11 @@ import okhttp3.Response;
 
 public class APIHelper {
 
-    //TODO: The external URL should be commented out. The other one is just for testing reasons
     //URL for Actual WebServer
     private static final String URL = "http://snf-868919.vm.okeanos.grnet.gr:5001/uploader_food";
 
-    //URL to run locally the API
+    //TODO: URL to run locally the API. Only for testing reasons
+
 //    private static final String URL = "http://10.0.2.2:5000/uploader_food";
 
     private static final String DEFAULT_FILE_NAME = "FILE";
