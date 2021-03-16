@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
                     Log.d(getPrefix(MainActivity.this), "The Response want't null");
                     Log.d(getPrefix(MainActivity.this), "Ready to display the recipe");
                     String recipe = buildTextToDisplay(wsResponse);
+                    Log.d(getPrefix(MainActivity.this), "The food is "+wsResponse.getFood()+" \nand the The recipie is \n"+recipe);
                     wsDataToDisplay.setText(R.string.wsData);
                     wsDataToDisplay.setText(recipe);
                 }
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements TaskCallback {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(getPrefix(this), " Ready to call the avtivity with code " + requestCode);
+        Log.d(getPrefix(this), " Ready to call the activity with code " + requestCode);
 
 
         if (resultCode != RESULT_CANCELED) {

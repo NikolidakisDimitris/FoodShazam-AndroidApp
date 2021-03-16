@@ -14,10 +14,10 @@ import okhttp3.Response;
 public class APIHelper {
 
     //URL for Actual WebServer
-    private static final String URL = "http://snf-868919.vm.okeanos.grnet.gr:5001/uploader_food";
+    private static final String URL = "http://83.212.109.213:5001/uploader_food";
+
 
     //TODO: URL to run locally the API. Only for testing reasons
-
 //    private static final String URL = "http://10.0.2.2:5000/uploader_food";
 
     private static final String DEFAULT_FILE_NAME = "FILE";

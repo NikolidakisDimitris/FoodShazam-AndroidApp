@@ -51,17 +51,7 @@ public class Utils {
 
         String text = "\n" + "If you want to cook it by your self, you can follow the next recipe" + "\n";
 
-//        String ingredients = "\n" + "The ingredients you need are: " + "\n";
-//        for (String current : response.getIngredient()) {
-//            ingredients += current + "\n";
-//        }
-//
-//        String recipe = "\n" + "Steps" + "\n" + response.getRecipe();
-
-//        String textToDisplay = food + text + ingredients + recipe;
-        String textToDisplay = food + text ;
-
-        return textToDisplay;
+        return food + text;
     }
 
 
@@ -72,9 +62,8 @@ public class Utils {
         }
 
         String recipe = "\n" + "Steps" + "\n" + response.getRecipe();
-        String textToDisplay = ingredients + recipe;
 
-        return textToDisplay;
+        return ingredients + recipe;
     }
 
     //Create String to display.
@@ -91,9 +80,7 @@ public class Utils {
 
         String recipe = "\n" + "Steps" + "\n" + response.getRecipe();
 
-        String textToDisplay = food + text + ingredients + recipe;
-
-        return textToDisplay;
+        return food + text + ingredients + recipe;
     }
 
 }
